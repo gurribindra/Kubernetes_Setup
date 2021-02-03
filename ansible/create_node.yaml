@@ -1,0 +1,36 @@
+- name: Create a VM from a template
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+  - name: Make sure requirements are met to run vmware_guest_snapshot module
+    become: true
+    pip:
+      name: PyVmomi
+      state: present
+    delegate_to: localhost
+
+
+
+  - name: Clone the template
+    vmware_guest:
+      hostname: 192.168.0.201
+      username: administrator@vmware.gsb.lab
+      password: Test1234!
+      validate_certs: False
+      name: "{{ esxi_vm_name }}"
+      template: Base-Centos-8
+      datacenter: localstack
+      folder: Kubernetes
+      state: poweredon
+      hardware:
+        nested_virt: yes
+        memory_mb: "{{ esxi_vm_ram_in_mb }}"
+        num_cpu_cores_per_socket: 2
+        num_cpus: "{{ esxi_vm_cpus }}"
+      disk:
+        - size_gb: 50
+          type: thin
+          datastore: nonSSD-iSCSI
+    delegate_to: localhost
+
